@@ -260,6 +260,194 @@ export const validateForm = (form) => {
 };
 ```
 
+Agora que temos os testes e erros podemos até mostrar para o usuário os erros. Primeiramente criamos uma variável para armazenar os erros, depois criamos uma div para mostrar os erros.
+
+```html
+<script setup>
+import { ref } from "vue";
+import { validateForm } from "./utils/validateForm";
+
+const form = ref({
+  name: "",
+  email: "",
+});
+
+const errors = ref({});
+
+const handleForm = () => {
+  const retorno = validateForm(form.value);
+  if (Object.keys(retorno).length > 0) {
+    errors.value = retorno;
+    return;
+  }
+};
+</script>
+
+<template>
+  <h1>Projeto Vitest com Vue</h1>
+  <div class="formulario">
+    <form @submit.prevent="handleForm">
+      <input type="text" name="nome" id="nome" v-model="form.name" />
+      <input type="email" name="email" id="email" v-model="form.email" />
+      <button type="submit">Enviar</button>
+    </form>
+
+    <p class="error" v-for="(error, index) in errors" :key="index">
+      {{ error }}
+    </p>
+  </div>
+</template>
+
+<style scoped></style>
+
+```
+
+## Capitulo 2 - Testando componentes simples
+
+Crie um componente simples chamado Logo.vue com o seguinte conteúdo.
+
+```html
+<template>RG Academia</template>
+
+<script setup>
+</script>
+
+<style>
+</style>
+```
+
+Importamos esse component no App.vue
+
+```html
+<template>
+  <h1>Projeto Vitest com Vue</h1>
+  <Logo />
+</template>
+```
+
+Agora podemos criar o arquivo Logo.test.js na pasta src/components. No entanto como se trata de um componente, precisamos de uma biblioteca para renderizar o componente. Para isso usaremos a biblioteca @vue/test-utils.
+
+```sh
+npm install @vue/test-utils -D
+```
+
+Agora podemos criar o arquivo de teste e usar a função mount para renderizar o componente.
+
+```js
+import { expect, test } from "vitest";
+import Logo from "./Logo.vue";
+
+import { mount } from "@vue/test-utils";
+
+test("Deve renderizar o componente Logo", () => {
+  const wrapper = mount(Logo);
+  expect(wrapper.text()).toContain("RG Academia");
+});
+```
+No entanto ainda teremos o erro 
+
+```sh
+ReferenceError: document is not defined
+ ❯ mount node_modules/@vue/test-utils/dist/vue-test-utils.cjs.js:8401:14
+```
+Isso porque ainda precisamos de uma biblioteca para simular o DOM (simular o navegador e não apenas montar o componente). Para isso usaremos a biblioteca jsdom.
+
+```sh
+npm install jsdom -D
+```
+Depois de instalar a biblioteca, precisamos configurar o vitest para usar ela. Para isso editamos o arquivo chamado vitest.config.js na raiz do projeto adicionando o seguinte conteúdo.
+
+```js
+export default defineConfig({
+  ...
+  test: {
+    environment: "jsdom",
+  },
+});
+```
+
+Fazemos isso porque existem outros tipos de simuladores de DOM, como o happy-dom e o node.
+
+Agora temos um código de teste que roda sem erros.
+
+```js
+import { expect, test } from "vitest";
+import Logo from "./Logo.vue";
+
+import { mount } from "@vue/test-utils";
+
+test("Deve renderizar o componente Logo", () => {
+  const wrapper = mount(Logo);
+  expect(wrapper.text()).toContain("RG Academia");
+});
+```
+
+### Métodos Mais Usados do Vue Test Utils
+
+| Método | Descrição | Casos de Uso |
+|--------|-----------|--------------|
+| **`mount()`** | Monta o componente de forma completa (com componentes filhos) | Teste de componentes de forma realista |
+| **`shallowMount()`** | Monta o componente isoladamente (stubs componentes filhos) | Teste unitário focado apenas no componente |
+| **`find()`** | Encontra um elemento no DOM ou componente filho | Verificar se elemento existe ou buscar elementos |
+| **`findAll()`** | Encontra todos os elementos que correspondem ao seletor | Listas, múltiplos elementos do mesmo tipo |
+| **`get()`** | Similar ao find() mas lança erro se não encontrar | Quando o elemento deve existir obrigatoriamente |
+| **`trigger()`** | Dispara eventos no elemento | Testar clicks, submits, inputs |
+| **`setValue()`** | Define valor em inputs, selects e textareas | Testar formulários e two-way binding |
+| **`setProps()`** | Atualiza as props do componente | Testar reatividade a mudanças de props |
+| **`setData()`** | Modifica o data do componente | Testar mudanças no estado interno |
+| **`emitted()`** | Verifica eventos emitidos pelo componente | Testar `this.$emit()` e comunicação |
+| **`html()`** | Retorna o HTML renderizado | Verificar estrutura do DOM |
+| **`text()`** | Retorna o texto content | Verificar conteúdo textual |
+| **`isVisible()`** | Verifica se elemento está visível | Testar v-show, v-if |
+| **`classes()`** | Retorna classes do elemento | Testar binding de classes |
+| **`exists()`** | Verifica se elemento/componente existe | Condicionais de renderização |
+
+## Exemplos Práticos:
+
+```javascript
+import { mount } from '@vue/test-utils'
+import MyComponent from './MyComponent.vue'
+
+// Mount vs ShallowMount
+const wrapper = mount(MyComponent, {
+  props: { title: 'Hello' },
+  data() { return { count: 0 } }
+})
+
+// Buscar elementos
+const button = wrapper.find('button')
+const inputs = wrapper.findAll('input')
+
+// Disparar eventos
+await button.trigger('click')
+await input.trigger('keyup.enter')
+
+// Trabalhar com formulários
+await input.setValue('novo valor')
+
+// Verificar emissão de eventos
+expect(wrapper.emitted('submit')).toBeTruthy()
+expect(wrapper.emitted('submit')[0]).toEqual(['dados'])
+
+// Verificar props e data
+await wrapper.setProps({ title: 'Novo Título' })
+await wrapper.setData({ count: 5 })
+
+// Verificar visibilidade e classes
+expect(button.isVisible()).toBe(true)
+expect(button.classes()).toContain('active')
+```
+
+## Quando Usar Cada Um:
+
+- **`mount()`**: Testes de integração, componentes com filhos reais
+- **`shallowMount()`**: Testes unitários puros, isolamento completo
+- **`find()`/`get()`**: Busca condicional vs obrigatória
+- **`trigger()`**: Interações do usuário
+- **`setValue()`**: Formulários e inputs
+- **`emitted()`**: Comunicação entre componentes
+
+
 ## Project Setup
 
 ```sh
