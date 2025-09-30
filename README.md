@@ -240,6 +240,25 @@ test("Deve retornar objeto vazio quando os dois forem preenchidos", () => {
 });
 ```
 
+Uma das coisas que podemos incrementar em nossa função é a validação é utilizar expressões regulares, por exemplo para validar e-mails, telefone e etc. A seguir segue um exemplo para validar um telefone
+
+```js
+export const validateForm = (form) => {
+  const errors = {};
+  if (!form.name || !form.name.trim()) {
+    errors.name = "Nome é obrigatório";
+  }
+  if (!form.email || !form.email.trim()) {
+    errors.email = "Email é obrigatório";
+  }
+  if (!form.phone || !form.phone.trim()) {
+    errors.phone = "Telefone é obrigatório";
+  } else if (!form.phone.match(/\d{2}\d{4,5}\d{4}/)) {
+    errors.phone = "Telefone inválido";
+  }
+  return errors;
+};
+```
 
 ## Project Setup
 

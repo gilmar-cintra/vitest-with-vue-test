@@ -57,3 +57,61 @@ test("Deve retornar erro de email caso o email for undefined", () => {
   
   expect(validateForm(form)).toEqual({ email: "Email é obrigatório" });
 });
+
+
+test("Deve retornar erro de nome se o nome for espaço vazio", () => {
+  const form = {
+    name: " ",
+    email: "email@email.com",
+  };
+  
+  expect(validateForm(form)).toEqual({ name: "Nome é obrigatório" });
+});
+
+test("Deve retornar erro de email se o email for espaço vazio", () => {
+  const form = {
+    name: "Nome",
+    email: " ",
+  };
+  
+  expect(validateForm(form)).toEqual({ email: "Email é obrigatório" });
+});
+
+test("Deve retornar erro de nome se o nome for vários espaços vazios", () => {
+  const form = {
+    name: "     ",
+    email: "email@email.com",
+  };
+  
+  expect(validateForm(form)).toEqual({ name: "Nome é obrigatório" });
+});
+
+test("Deve retornar erro de email se o email for vários espaços vazios", () => {
+  const form = {
+    name: "Nome",
+    email: "     ",
+  };
+  
+  expect(validateForm(form)).toEqual({ email: "Email é obrigatório" });
+});
+
+
+test("Deve retornar erro de nome se o nome for null", () => {
+  const form = {
+    name: null,
+    email: "email@email.com",
+  };
+  
+  expect(validateForm(form)).toEqual({ name: "Nome é obrigatório" });
+});
+
+test("Deve retornar erro de email se o email for null", () => {
+  const form = {
+    name: "Nome",
+    email: null,
+  };
+  
+  expect(validateForm(form)).toEqual({ email: "Email é obrigatório" });
+});
+
+
