@@ -402,7 +402,7 @@ test("Deve renderizar o componente Logo", () => {
 | **`classes()`** | Retorna classes do elemento | Testar binding de classes |
 | **`exists()`** | Verifica se elemento/componente existe | Condicionais de renderização |
 
-## Exemplos Práticos:
+### Exemplos Práticos:
 
 ```javascript
 import { mount } from '@vue/test-utils'
@@ -438,7 +438,7 @@ expect(button.isVisible()).toBe(true)
 expect(button.classes()).toContain('active')
 ```
 
-## Quando Usar Cada Um:
+### Quando Usar Cada Um:
 
 - **`mount()`**: Testes de integração, componentes com filhos reais
 - **`shallowMount()`**: Testes unitários puros, isolamento completo
@@ -448,22 +448,67 @@ expect(button.classes()).toContain('active')
 - **`emitted()`**: Comunicação entre componentes
 
 
-## Project Setup
+## Capitulo 3 - Testando componentes com interações
 
-```sh
-npm install
+Para esse capitulo criaremos uma textarea que ao digitar, terá o contador de caracteres atualizado e limitado em 150 caracteres.
+
+1º No componente App.vue incluimos o campo de texto e o contador.
+
+```html
+<textarea
+  name="message"
+  id="message"
+  v-model="form.message"
+  maxlength="150"
+></textarea>
+<p class="contador">{{ form.message.length }}/150</p>
 ```
 
-### Compile and Hot-Reload for Development
+2º Criamos o arquivo de teste. App.test.js e fazemos o importe do App.vue e do vitest e do vue test utils.
 
-```sh
-npm run dev
+```js
+//Importamos o componente App
+import App from "./App.vue";
+//Importamos o vitest e o vue test utils
+import { expect, test } from "vitest";
+import { mount } from "@vue/test-utils";
 ```
 
-### Compile and Minify for Production
 
-```sh
-npm run build
+3º Agora iniciaremos o teste, testando a condição inicial do contador que tem que mostrar 0/150.
+
+```js
+test("Deve renderizar o contador com 0/150", () => {
+  //Monto o componente
+  const wrapper = mount(App);
+
+  //Busco o elemento p com a class contador e pego o texto
+  const retorno = wrapper.find(".contador").text();
+
+  //Faço a asserção
+  expect(retorno).toBe("0/150");
+});
 ```
+
+Nesse segundo teste iremos simular a digitação de um texto na textarea e verificar se o contador foi atualizado. Para isso usaremos o método setValue() do vue test utils.
+
+```js
+test("Deve renderizar o contador com 150/150", async () => {
+  //Monto o componente
+  const wrapper = mount(App);
+
+  //Busco o elemento textarea e seto o valor
+  const textareaElement = wrapper.find("textarea");
+  await textareaElement.setValue("a".repeat(150));
+
+  //Busco o elemento p com a class contador e pego o texto
+  const retorno = wrapper.find(".contador").text();
+
+  //Faço a asserção
+  expect(retorno).toBe("150/150");
+});
+```
+
+
 
 

@@ -6,6 +6,7 @@ import Logo from "@/components/Logo.vue";
 const form = ref({
   name: "",
   email: "",
+  message: "",
 });
 
 const errors = ref({});
@@ -26,6 +27,14 @@ const handleForm = () => {
     <form @submit.prevent="handleForm">
       <input type="text" name="nome" id="nome" v-model="form.name" />
       <input type="email" name="email" id="email" v-model="form.email" />
+      <textarea
+        name="message"
+        id="message"
+        class="message"
+        v-model="form.message"
+        maxlength="150"
+      ></textarea>
+      <p class="contador">{{ form.message.length }}/150</p>
       <button type="submit">Enviar</button>
     </form>
 
